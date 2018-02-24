@@ -1,0 +1,17 @@
+{
+  "name": "dublinrentalstats",
+  "version": "0.1.0",
+  "description": "Because who doesn't want a depression?",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Robin Jacobs",
+  "license": "GPLv3",
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "cheerio": "^1.0.0-rc.2",
+    "request": "^2.82.0",
+    "request-promise": "^4.2.2"
+  }
+}

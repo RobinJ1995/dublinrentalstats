@@ -112,10 +112,10 @@ function writeStats([
 	]) {
 	
 	return Promise.promisify(Fs.readFile)(STATS_FILE).catch(
-		() => ({})
+		() => '{}'
 	).then(
 		stats => ({
-			...stats,
+			...JSON.parse(stats),
 			[new Date()]: {
 				rent: {
 					county: {

@@ -3,7 +3,7 @@ const Request = require('request-promise');
 const Promise = require('bluebird');
 const Fs = require('fs');
 
-const URL_RENT_CO = 'http://www.daft.ie/dublin/residential-property-for-rent/?sort_by%5D=price&s%5Bsort_type%5D=a';
+const URL_RENT_CO = 'http://www.daft.ie/dublin/residential-property-for-rent/?s[sort_type]=a&s[sort_by]=price';
 const URL_RENT_CI = 'http://www.daft.ie/dublin-city/residential-property-for-rent/?s[sort_by]=price&s[sort_type]=a&searchSource=rental';
 
 const URL_SHARING_CO = 'http://www.daft.ie/dublin/rooms-to-share/?s%5Broom_type%5D=either&s%5Badvanced%5D=1&s%5Bgender%5D=on&s%5Bsort_by%5D=price&s%5Bsort_type%5D=a&searchSource=sharing';

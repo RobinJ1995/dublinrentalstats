@@ -114,7 +114,7 @@ function calculateAverage(prices) {
 }
 
 function calculateMedian(prices) {
-	prices.sort();
+	prices.sort((a, b) => a - b);
 	
 	const middle = Math.floor(prices.length / 2);
 	

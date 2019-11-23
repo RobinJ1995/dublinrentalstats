@@ -16,6 +16,9 @@ const WEEKS_IN_A_MONTH = 4.34524; // https://www.google.ie/search?q=weeks+in+a+m
 const STATS_FILE = 'stats.json';
 const INDEX_DELAY = 1000;
 
+const CONFIG_S3_BUCKET = process.env.S3_BUCKET;
+const CONFIG_S3_ENDPOINT = process.env.S3_ENDPOINT;
+
 const promises = [];
 
 // Rent
@@ -173,5 +176,34 @@ function writeStats(data) {
 		})
 	).then(JSON.stringify).then(
 		stats => Promise.promisify(Fs.writeFile)(STATS_FILE, stats, 'utf8')
+	).then(
+		uploadS3
 	);
+}
+
+function uploadS3() {
+	const S3 = require('aws-sdk/clients/s3');
+	
+	if (! CONFIG_S3_BUCKET) {
+		return;
+	}
+	
+	const s3Config = CONFIG_S3_ENDPOINT ? {'endpoint': CONFIG_S3_ENDPOINT} : undefined;
+	const s3 = new S3(s3Config);
+	
+	return Promise.promisify(Fs.readFile)(STATS_FILE).then(
+		stats => s3.upload({
+			Bucket: CONFIG_S3_BUCKET,
+			Key: `stats-${new Date().toISOString()}.json`,
+			Body: stats,
+			ACL: 'public-read'
+		}).promise().then(() => stats)).then(
+			stats => s3.upload({
+			Bucket: CONFIG_S3_BUCKET,
+			Key: `stats.json`,
+			Body: stats,
+			ACL: 'public-read'
+		}).promise()).then(
+			() => console.log('Uploaded stats.json')
+		);
 }

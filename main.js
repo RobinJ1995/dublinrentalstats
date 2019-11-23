@@ -167,7 +167,7 @@ function priceToNumber(price) {
 }
 
 function writeStats(data) {
-	return Promise.promisify(Fs.readFile)(STATS_FILE).catch(
+	return readPrevious().catch(
 		() => '{}'
 	).then(
 		stats => ({
@@ -181,6 +181,26 @@ function writeStats(data) {
 	);
 }
 
+function readPrevious() {
+	if (! CONFIG_S3_BUCKET) {
+		return Promise.promisify(Fs.readFile)(STATS_FILE);
+	}
+
+	return retrieveS3();
+}
+
+function retrieveS3() {
+	const S3 = require('aws-sdk/clients/s3');
+
+	const s3Config = CONFIG_S3_ENDPOINT ? {'endpoint': CONFIG_S3_ENDPOINT} : undefined;
+	const s3 = new S3(s3Config);
+
+	return s3.getObject({
+		Bucket: CONFIG_S3_BUCKET,
+		Key: 'stats.json',
+	}).promise().then(response => response.Body.toString());
+}
+
 function uploadS3() {
 	const S3 = require('aws-sdk/clients/s3');
 	
@@ -191,7 +211,7 @@ function uploadS3() {
 	const s3Config = CONFIG_S3_ENDPOINT ? {'endpoint': CONFIG_S3_ENDPOINT} : undefined;
 	const s3 = new S3(s3Config);
 	
-	return Promise.promisify(Fs.readFile)(STATS_FILE).then(
+	return readPrevious().then(
 		stats => s3.upload({
 			Bucket: CONFIG_S3_BUCKET,
 			Key: `stats-${new Date().toISOString()}.json`,
@@ -200,7 +220,7 @@ function uploadS3() {
 		}).promise().then(() => stats)).then(
 			stats => s3.upload({
 			Bucket: CONFIG_S3_BUCKET,
-			Key: `stats.json`,
+			Key: 'stats.json',
 			Body: stats,
 			ACL: 'public-read'
 		}).promise()).then(

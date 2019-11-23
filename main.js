@@ -167,9 +167,7 @@ function priceToNumber(price) {
 }
 
 function writeStats(data) {
-	return readPrevious().catch(
-		() => '{}'
-	).then(
+	return readPrevious().then(
 		stats => ({
 			...JSON.parse(stats),
 			[new Date()]: data,
@@ -183,7 +181,9 @@ function writeStats(data) {
 
 function readPrevious() {
 	if (! CONFIG_S3_BUCKET) {
-		return Promise.promisify(Fs.readFile)(STATS_FILE);
+		return Promise.promisify(Fs.readFile)(STATS_FILE).catch(
+			() => '{}'
+		);
 	}
 
 	return retrieveS3();

@@ -16,6 +16,7 @@ const WEEKS_IN_A_MONTH = 4.34524; // https://www.google.ie/search?q=weeks+in+a+m
 const STATS_FILE = 'stats.json';
 const INDEX_DELAY = 1000;
 
+const CONFIG_VERBOSE = !!process.env.VERBOSE;
 const CONFIG_S3_BUCKET = process.env.S3_BUCKET;
 const CONFIG_S3_ENDPOINT = process.env.S3_ENDPOINT;
 
@@ -98,6 +99,14 @@ Highest: €${formatNumber(sharingCiStats.highest)}
 	writeStats
 );
 
+function log(str) {
+	if (! CONFIG_VERBOSE) {
+		return;
+	}
+
+	console.log(str);
+}
+
 function performCalculations(prices) {
 	const lowest = Math.min(...prices);
 	const highest = Math.max(...prices);
@@ -142,6 +151,8 @@ function fetchAllPrices(url, selector, pricesAcc = []) {
 		const prices = pricesAcc.concat(doc(SEL_PRICE).map((i, e) => Cheerio(e).text()).get());
 		
 		if (doc(SEL_NEXT_PAGE).length === 0) {
+			log('Reached last page.');
+
 			return prices;
 		}
 		
@@ -179,12 +190,16 @@ function writeStats(data) {
 	);
 }
 
-function readPrevious() {
-	if (! CONFIG_S3_BUCKET) {
+function readPrevious(forceLocal = false) {
+	if (forceLocal || ! CONFIG_S3_BUCKET) {
+		log('Reading previous stats.json file from local filesystem');
+
 		return Promise.promisify(Fs.readFile)(STATS_FILE).catch(
 			() => '{}'
 		);
 	}
+
+	log('Reading previous stats.json file from S3');
 
 	return retrieveS3();
 }
@@ -205,13 +220,17 @@ function uploadS3() {
 	const S3 = require('aws-sdk/clients/s3');
 	
 	if (! CONFIG_S3_BUCKET) {
+		log('Not uploading stats.json to S3');
+
 		return;
 	}
+
+	log('Uploading stats.json to S3');
 	
 	const s3Config = CONFIG_S3_ENDPOINT ? {'endpoint': CONFIG_S3_ENDPOINT} : undefined;
 	const s3 = new S3(s3Config);
 	
-	return readPrevious().then(
+	return readPrevious(true).then(
 		stats => s3.upload({
 			Bucket: CONFIG_S3_BUCKET,
 			Key: `stats-${new Date().toISOString()}.json`,
@@ -224,6 +243,6 @@ function uploadS3() {
 			Body: stats,
 			ACL: 'public-read'
 		}).promise()).then(
-			() => console.log('Uploaded stats.json')
+			() => log('Uploaded stats.json')
 		);
 }

@@ -11,7 +11,7 @@
   "dependencies": {
     "aws-sdk": "^2.578.0",
     "bluebird": "^3.5.1",
-    "cheerio": "^1.0.0-rc.2",
+    "cheerio": "^1.0.0-rc.12",
     "request": "^2.82.0",
     "request-promise": "^4.2.2"
   }

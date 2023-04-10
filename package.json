@@ -9,7 +9,7 @@
   "author": "Robin Jacobs",
   "license": "GPLv3",
   "dependencies": {
-    "aws-sdk": "^2.578.0",
+    "aws-sdk": "^2.1354.0",
     "bluebird": "^3.5.1",
     "cheerio": "^1.0.0-rc.2",
     "request": "^2.82.0",
